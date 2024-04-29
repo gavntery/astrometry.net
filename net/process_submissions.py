@@ -32,6 +32,9 @@ import django
 django.setup()
 
 from django.core.exceptions import MultipleObjectsReturned
+from prometheus_client import start_http_server, Counter
+REQUEST_COUNTER = Counter('api_requests_total', 'Total number of API requests', ['result'])
+ERROR_COUNTER = Counter('app_errors_total', 'Total number of errors', ['type'])
 
 import requests
 
@@ -224,6 +227,7 @@ def try_dojob(job, userimage, solve_command, solve_locally):
     except:
         print('Caught exception while processing Job', job)
         traceback.print_exc(None, sys.stdout)
+        ERROR_COUNTER.labels('job').inc()
         # FIXME -- job.set_status()...
         job.set_end_time()
         job.status = 'F'
@@ -530,7 +534,10 @@ def dosub(sub, tempfiles=None, tempdirs=None):
         #(fn, headers) = urllib.request.urlretrieve(sub.url)
         # open URL
         # (note that the timeout is not on the overall request, it's a "haven't heard from you in...")
-        r = requests.get(sub.url, stream=True, timeout=10)
+        r = requests.get(sub.url, stream=True, timeout=30)
+        if r.status_code != 200:
+            ERROR_COUNTER.labels(type='download').inc()
+            REQUEST_COUNTER.labels(result='F').inc()
         # stream URL contents to temp file
         fn = get_temp_file(tempfiles=tempfiles)
         logmsg('Sub %i: retrieving URL %s to temp file %s' % (sub.id, sub.url, fn))
@@ -907,6 +914,7 @@ def main(dojob_nthreads, dosub_nthreads, refresh_rate, max_sub_retries,
                     #logfn = job.get_log_file()
                     print('  log file tail:')
                     print(job.get_log_tail(nlines=10))
+                    REQUEST_COUNTER.labels(result=job.status).inc()
                     
                 except:
                     print('exception getting job')
@@ -1037,5 +1045,6 @@ if __name__ == '__main__':
 
     opt,args = parser.parse_args()
 
+    start_http_server(6794)
     main(opt.jobthreads, opt.subthreads, opt.refreshrate, opt.maxsubretries,
          opt.solve_command, opt.solve_locally)

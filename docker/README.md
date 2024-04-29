@@ -1,7 +1,7 @@
 # Astrometry.net Web Interface Dockerfiles
 
 Many people visit this repository with the intention of deploying a local version of the astrometry.net web interface.
-Although it's entirely feasible to manually follow the instructions in the `net`` folder, we also provide docker files to enable a quick and efficient deployment.
+Although it's entirely feasible to manually follow the instructions in the `net` folder, we also provide docker files to enable a quick and efficient deployment.
 However, it's important to note that these docker files are primarily designed for quick trials and development.
 If you're planning to use them for production, they'll require further refinement, particularly in terms of security settings.
 
@@ -18,8 +18,8 @@ One can use the command line provided below to download.
 Please note that all the command lines referenced in this document assume that they are being executed under the repository root, such as `~/astrometry.net`, and not the current folder.
 ```
 mkdir -p ../astrometry_indexes
-pushd ../astrometry_indexes/ \
-&& for i in 4100 4200; do \
+pushd ../astrometry_indexes/ && \
+for i in 4100 4200; do \
     wget -r -l1 --no-parent -nc -nd -A ".fits" http://data.astrometry.net/$i/;\
 done
 popd

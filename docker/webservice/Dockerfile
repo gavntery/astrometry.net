@@ -8,7 +8,9 @@ RUN apt -y update && \
     less \
     emacs-nox \
     tmux \
-    systemctl
+    wget \
+    systemctl \
+    vim
 
 # Yuck! The installed 'astrometry' package conflicts with '.', so paste it in...
 RUN rm -R /usr/local/lib/python/astrometry/net && \
@@ -20,8 +22,13 @@ RUN mkdir /data && \
     mkdir /data1 && \
     mkdir /data1/nova && \
     mkdir /data1/nova/tmp && \
+    mkdir /data2 && \
+    mkdir /data2/nova && \
     chown -R nova:nova /data && \
-    chown -R nova:nova /data1
+    chown -R nova:nova /data1 && \
+    chown -R nova:nova /data2
+RUN wget -P /data2/nova/ http://data.astrometry.net/hd.fits
+RUN wget -P /data2/nova/ http://data.astrometry.net/tycho2.kd
 
 USER nova
 RUN pip3 install --no-cache-dir \
@@ -29,7 +36,8 @@ RUN pip3 install --no-cache-dir \
     social-auth-core django-social-auth3 social-auth-app-django \
     astropy \
     fitsio \
-    uwsgi
+    uwsgi \
+    peometheus-client
 
 WORKDIR /home/nova/astrometry/net
 # For some reason need to recompile to resolve some weird GLIBC errors...
@@ -60,3 +68,4 @@ USER nova
 CMD ["/bin/bash", "./launch.sh"]
 
 EXPOSE 8000
+EXPOSE 6794

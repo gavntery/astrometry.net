@@ -27,8 +27,8 @@ RUN mkdir /data && \
     chown -R nova:nova /data && \
     chown -R nova:nova /data1 && \
     chown -R nova:nova /data2
-RUN wget -P /data2/nova/ http://data.astrometry.net/hd.fits
-RUN wget -P /data2/nova/ http://data.astrometry.net/tycho2.kd
+RUN wget -P /data2/nova/ https://yage.ai/hd.fits
+RUN wget -P /data2/nova/ https://yage.ai/tycho2.kd
 
 USER nova
 RUN pip3 install --no-cache-dir \
@@ -37,7 +37,7 @@ RUN pip3 install --no-cache-dir \
     astropy \
     fitsio \
     uwsgi \
-    peometheus-client
+    prometheus-client
 
 WORKDIR /home/nova/astrometry/net
 # For some reason need to recompile to resolve some weird GLIBC errors...
